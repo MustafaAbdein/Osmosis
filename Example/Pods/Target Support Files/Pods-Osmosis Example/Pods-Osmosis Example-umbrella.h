@@ -10,8 +10,7 @@
 #endif
 #endif
 
-#import "Kanna.h"
 
-FOUNDATION_EXPORT double KannaVersionNumber;
-FOUNDATION_EXPORT const unsigned char KannaVersionString[];
+FOUNDATION_EXPORT double Pods_Osmosis_ExampleVersionNumber;
+FOUNDATION_EXPORT const unsigned char Pods_Osmosis_ExampleVersionString[];
 

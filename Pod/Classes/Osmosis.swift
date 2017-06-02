@@ -10,14 +10,14 @@ import Foundation
 import Kanna
 
 public enum HTMLSelectorType {
-    case CSS
-    case XPath
+    case css
+    case xPath
 }
 
-typealias OperationCallback = (doc: HTMLDocument?, node: XMLElement?, dict: [String: AnyObject]?, error: NSError?)->Void
-public typealias OsmosisErrorCallback = (error: NSError)->Void
-public typealias OsmosisInfoCallback = (info: String)->Void
-public typealias OsmosisListCallback = (dict: [String: AnyObject])->Void
+typealias OperationCallback = (_ doc: HTMLDocument?, _ node: XMLElement?, _ dict: [String: AnyObject]?, _ error: NSError?)->Void
+public typealias OsmosisErrorCallback = (_ error: NSError)->Void
+public typealias OsmosisInfoCallback = (_ info: String)->Void
+public typealias OsmosisListCallback = (_ dict: [String: AnyObject])->Void
 
 public struct OsmosisSelector {
     var selector: String
@@ -30,14 +30,14 @@ public struct OsmosisSelector {
 }
 
 public enum OsmosisPopulateKey: Hashable, Equatable {
-    case Array(String)
-    case Single(String)
+    case array(String)
+    case single(String)
     
     public var hashValue: Int {
         switch self {
-        case Array(let arg):
+        case .array(let arg):
             return arg.hashValue
-        case .Single(let arg):
+        case .single(let arg):
             return arg.hashValue
         }
     }
@@ -46,7 +46,7 @@ public enum OsmosisPopulateKey: Hashable, Equatable {
 internal class FinishOperation: OsmosisOperation {
     var next: OsmosisOperation?
     
-    func execute(doc: HTMLDocument?, currentURL: NSURL?, node: XMLElement?, dict: [String : AnyObject]) {
+    func execute(_ doc: HTMLDocument?, currentURL: URL?, node: XMLElement?, dict: [String : AnyObject]) {
         print("done")
     }
 }
@@ -55,7 +55,7 @@ public func == (lhs: OsmosisPopulateKey, rhs: OsmosisPopulateKey) -> Bool {
     return lhs.hashValue == rhs.hashValue
 }
 
-public class Osmosis {
+open class Osmosis {
     
     var errorHandler: OsmosisErrorCallback?
     var infoHandler: OsmosisInfoCallback?
@@ -67,7 +67,7 @@ public class Osmosis {
         self.infoHandler = infoHandler
     }
     
-    public func find(string: OsmosisSelector, type: HTMLSelectorType = .CSS)->Osmosis {
+    open func find(_ string: OsmosisSelector, type: HTMLSelectorType = .css)->Osmosis {
         
         let new = FindOperation(query: string, type: type, errorHandler: errorHandler)
         if var operation = operations.last {
@@ -81,7 +81,7 @@ public class Osmosis {
         return self
     }
     
-    public func populate(dict: [OsmosisPopulateKey:OsmosisSelector], type: HTMLSelectorType = .CSS)->Osmosis {
+    open func populate(_ dict: [OsmosisPopulateKey:OsmosisSelector], type: HTMLSelectorType = .css)->Osmosis {
         
         let new = PopulateOperation(queries: dict, type: type, errorHandler: errorHandler)
         if var operation = operations.last {
@@ -95,7 +95,7 @@ public class Osmosis {
         return self
     }
     
-    public func follow(string: OsmosisSelector, type: HTMLSelectorType = .CSS)->Osmosis {
+    open func follow(_ string: OsmosisSelector, type: HTMLSelectorType = .css)->Osmosis {
         
         let new = FollowOperation(query: string, type: type, errorHandler: errorHandler)
         if var operation = operations.last {
@@ -109,7 +109,7 @@ public class Osmosis {
         return self
     }
     
-    public func get(url: NSURL)->Osmosis {
+    open func get(_ url: URL)->Osmosis {
         
         let new = GetOperation(url: url, errorHandler: errorHandler)
         if var operation = operations.last {
@@ -120,7 +120,7 @@ public class Osmosis {
         return self
     }
     
-    public func list(callback: OsmosisListCallback)->Osmosis{
+    open func list(_ callback: @escaping OsmosisListCallback)->Osmosis{
         let new = ListOperation(callback: callback)
         if var operation = operations.last {
             operation.next = new
@@ -132,7 +132,7 @@ public class Osmosis {
         return self
     }
     
-    public func load(html: NSData, encoding: NSStringEncoding)->Osmosis {
+    open func load(_ html: Data, encoding: String.Encoding)->Osmosis {
         
         let new = LoadOperation(data: html, encoding: encoding, errorHandler: errorHandler)
         if var operation = operations.last {
@@ -143,12 +143,12 @@ public class Osmosis {
         return self
     }
     
-    public func start(){
+    open func start(){
         operations.first?.execute(nil, currentURL: nil, node: nil, dict: [String: AnyObject]())
     }
 }
 
 internal protocol OsmosisOperation {
     var next: OsmosisOperation? { get set }
-    func execute(doc: HTMLDocument?, currentURL: NSURL?, node: XMLElement?, dict: [String: AnyObject])
+    func execute(_ doc: HTMLDocument?, currentURL: URL?, node: XMLElement?, dict: [String: AnyObject])
 }

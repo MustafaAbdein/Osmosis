@@ -22,30 +22,30 @@ internal class PopulateOperation: OsmosisOperation {
         self.errorHandler = errorHandler
     }
     
-    func execute(doc: HTMLDocument?, currentURL: NSURL?, node: XMLElement?, dict: [String: AnyObject]) {
+    func execute(_ doc: HTMLDocument?, currentURL: URL?, node: XMLElement?, dict: [String: AnyObject]) {
         var newDict = dict
         for (key, query) in queries {
-            var nodes: XMLNodeSet?
+            var nodes: XPathObject?
             switch type {
-            case .CSS:
+            case .css:
                 nodes = node?.css(query.selector)
-            case .XPath:
+            case .xPath:
                 nodes = node?.xpath(query.selector)
             }
             
-            if let nodes = nodes where nodes.count != 0 {
+            if let nodes = nodes, nodes.count != 0 {
                 switch key {
-                case .Single(let key):
+                case .single(let key):
                     if let node = nodes.first {
                         if let selector = query.attribute {
-                            newDict[key] = node[selector]
+                            newDict[key] = node[selector]! as String as AnyObject
                         }else{
-                            newDict[key] = node.text
+                            newDict[key] = node.text as AnyObject
                         }
                     }else{
-                        self.errorHandler?(error: NSError(domain: "No node found for populate \(query)", code: 500, userInfo: nil))
+                        self.errorHandler?(NSError(domain: "No node found for populate \(query)", code: 500, userInfo: nil))
                     }
-                case .Array(let key):
+                case .array(let key):
                     var contentArray = [String]()
                     for node in nodes {
                         if let selector = query.attribute {
@@ -54,10 +54,10 @@ internal class PopulateOperation: OsmosisOperation {
                             contentArray.append(node.text ?? "")
                         }
                     }
-                    newDict[key] = contentArray
+                    newDict[key] = contentArray as AnyObject
                 }
             }else{
-                self.errorHandler?(error: NSError(domain: "No node found for populate \(query)", code: 500, userInfo: nil))
+                self.errorHandler?(NSError(domain: "No node found for populate \(query)", code: 500, userInfo: nil))
             }
         }
         

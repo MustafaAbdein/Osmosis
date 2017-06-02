@@ -16,6 +16,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.source_files = 'Pod/Classes/**/*'
-  s.dependency 'Kanna', '~> 1.0.0'
+  s.dependency 'Kanna', '~> 2.1.0'
+
 
 end
